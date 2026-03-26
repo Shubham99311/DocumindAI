@@ -1,0 +1,57 @@
+import pandas as pd
+import re
+import os
+
+def clean_ocr_text(text):
+    """
+    Cleans text extracted from images (OCR).
+    """
+    if not isinstance(text, str):
+        return ""
+    
+    # 1. Lowercase
+    text = text.lower()
+    
+    # 2. Remove newlines, tabs, and carriage returns
+    text = re.sub(r'[\r\n\t]+', ' ', text)
+    
+    # 3. Remove non-ASCII characters (removes OCR noise like ‘, £, ~)
+    # Note: Remove this block if you need to preserve accents or currency symbols
+    text = text.encode('ascii', 'ignore').decode('ascii')
+    
+    # 4. Remove excessive whitespace (multiple spaces becomes one)
+    text = re.sub(r'\s+', ' ', text)
+    
+    # 5. Strip leading and trailing whitespace
+    return text.strip()
+
+# List of your files
+files_to_process = ['train.csv', 'test.csv', 'val.csv']
+
+for filename in files_to_process:
+    if os.path.exists(filename):
+        print(f"Processing {filename}...")
+        
+        try:
+            # Read the CSV
+            df = pd.read_csv(filename)
+            
+            # Check if 'text' column exists to avoid errors
+            if 'text' in df.columns:
+                # Apply cleaning
+                df['cleaned_text'] = df['text'].apply(clean_ocr_text)
+                
+                # Save to a new file (e.g., train_cleaned.csv)
+                output_filename = filename.replace('.csv', '_cleaned.csv')
+                df.to_csv(output_filename, index=False)
+                
+                print(f"Successfully saved: {output_filename}")
+            else:
+                print(f"Skipping {filename}: 'text' column not found.")
+                
+        except Exception as e:
+            print(f"Error processing {filename}: {e}")
+    else:
+        print(f"File not found: {filename}")
+
+print("\nAll tasks completed.")
