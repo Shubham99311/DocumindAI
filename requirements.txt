@@ -1,0 +1,10 @@
+streamlit
+pillow
+pytesseract
+joblib
+transformers
+pandas
+scikit-learn
+xgboost
+pdf2image
+torch
